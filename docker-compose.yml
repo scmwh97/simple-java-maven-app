@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  jenkins-docker:
+    image: docker:dind
+    restart: always
+    privileged: true
+    networks:
+      - mynet
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-data:/var/jenkins_home
+      - ./home:/home
+    ports:
+      - "2376:2376"
+
+  jenkins-blueocean:
+    image: jenkinsci/blueocean:latest
+    restart: always
+    networks:
+      - mynet
+    depends_on:
+      - jenkins-docker
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      DOCKER_HOST: tcp://127.0.0.1:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: 1
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+      - ./home:/home
+
+volumes:
+  jenkins-docker-certs:
+  jenkins-data:
+
+networks:
+  mynet:
+    driver: bridge

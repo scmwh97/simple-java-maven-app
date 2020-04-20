@@ -1,0 +1,1 @@
+winpty docker container exec -it jenkins_jenkinsci_1 bash
